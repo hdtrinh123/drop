@@ -2,10 +2,16 @@ using UnityEngine;
 
 public class playercontroller : MonoBehaviour
 {
-    
+    public Rigidbody rb;
+    public float speed = 12f;
     void Update()
     {
-        //rotate the player
-        transform.Rotate(0, 0, 45);
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
+
+        Vector3 move = transform.right * x + transform.forward * z;
+
+        rb.linearVelocity = new Vector3(move.x, rb.linearVelocity.y, move.z) * speed * Time.deltaTime;
+
     }
 }
