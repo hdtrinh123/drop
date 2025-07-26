@@ -8,12 +8,13 @@ public class PlayerMovementTutorial : MonoBehaviour
     [Header("Movement")]
     public float moveSpeed;
 
-    public float groundDrag;
+    public float groundDrag = 0f; // Set to 0 for momentum-based movement, increase for more friction
 
     public float jumpForce;
     public float jumpCooldown;
     public float airMultiplier;
     bool readyToJump;
+    
 
     [HideInInspector] public float walkSpeed;
     [HideInInspector] public float sprintSpeed;
@@ -34,6 +35,8 @@ public class PlayerMovementTutorial : MonoBehaviour
     Vector3 moveDirection;
 
     Rigidbody rb;
+    private PlayerSwing swingScript;
+    public float swingMaxSpeed = 1000f; // Very high max speed when swinging
 
     private void Start()
     {
@@ -41,6 +44,7 @@ public class PlayerMovementTutorial : MonoBehaviour
         rb.freezeRotation = true;
 
         readyToJump = true;
+        swingScript = GetComponent<PlayerSwing>();
     }
 
     private void Update()
@@ -53,9 +57,9 @@ public class PlayerMovementTutorial : MonoBehaviour
 
         // handle drag
         if (grounded)
-            rb.linearDamping = groundDrag;
+            rb.linearDamping = groundDrag; // Use drag for ground friction
         else
-            rb.linearDamping = 0;
+            rb.linearDamping = 0; // No drag in air for fluid movement
     }
 
     private void FixedUpdate()
@@ -95,12 +99,16 @@ public class PlayerMovementTutorial : MonoBehaviour
 
     private void SpeedControl()
     {
+        float maxSpeed = moveSpeed;
+        if (swingScript != null && swingScript.IsSwinging)
+            maxSpeed = swingMaxSpeed;
+
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
         // limit velocity if needed
-        if(flatVel.magnitude > moveSpeed)
+        if(flatVel.magnitude > maxSpeed)
         {
-            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            Vector3 limitedVel = flatVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
         }
     }
