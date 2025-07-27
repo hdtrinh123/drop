@@ -88,25 +88,33 @@ public class PlayerMovementTutorial : MonoBehaviour
         // calculate movement direction
         moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
-        // on ground
-        if(grounded)
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
+        bool isSwinging = swingScript != null && swingScript.IsSwinging;
 
-        // in air
-        else if(!grounded)
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+        if (grounded || isSwinging)
+        {
+            float forceMultiplier = grounded ? 1f : airMultiplier;
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * forceMultiplier, ForceMode.Force);
+        }
+        else
+        {
+            // Small air control when not swinging
+            float airControlMultiplier = 0.2f; // Tweak this value (0.1-0.3) for desired air control
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+        }
     }
 
     private void SpeedControl()
     {
         float maxSpeed = moveSpeed;
-        if (swingScript != null && swingScript.IsSwinging)
+        bool isSwinging = swingScript != null && swingScript.IsSwinging;
+
+        if (isSwinging)
             maxSpeed = swingMaxSpeed;
 
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        // limit velocity if needed
-        if(flatVel.magnitude > maxSpeed)
+        // Only clamp velocity if grounded or swinging
+        if ((grounded || isSwinging) && flatVel.magnitude > maxSpeed)
         {
             Vector3 limitedVel = flatVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);

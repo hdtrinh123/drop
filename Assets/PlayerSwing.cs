@@ -15,6 +15,7 @@ public class PlayerSwing : MonoBehaviour
     private Vector3 swingPoint;
     private Camera cam;
     private Rigidbody rb;
+    private Vector3 lastSwingVelocity;
     
 
 
@@ -76,8 +77,17 @@ public class PlayerSwing : MonoBehaviour
     {
         if (swingJoint != null)
         {
+            // Store the current velocity
+            lastSwingVelocity = rb.linearVelocity;
+
             lineRenderer.positionCount = 0;
             Destroy(swingJoint);
+
+            // Optionally, re-apply the velocity to ensure momentum is kept
+            rb.linearVelocity = lastSwingVelocity;
+
+            // Optional: Add a small boost if you want
+            // rb.AddForce(lastSwingVelocity.normalized * 2f, ForceMode.VelocityChange);
         }
     }
 
