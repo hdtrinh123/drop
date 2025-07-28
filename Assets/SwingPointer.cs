@@ -36,7 +36,7 @@ public class SwingPointer : MonoBehaviour
         if (playerSwing != null && playerSwing.IsSwinging)
         {
             // Optionally, hide the pointer while swinging
-            pointerInstance.SetActive(false);
+            // pointerInstance.SetActive(false);
             return;
         }
 

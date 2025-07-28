@@ -25,7 +25,7 @@ public class PlayerMovementTutorial : MonoBehaviour
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatIsGround;
-    bool grounded;
+    [HideInInspector] public bool grounded;
 
     public Transform orientation;
 
@@ -37,6 +37,11 @@ public class PlayerMovementTutorial : MonoBehaviour
     Rigidbody rb;
     private PlayerSwing swingScript;
     public float swingMaxSpeed = 1000f; // Very high max speed when swinging
+    private WallRunning wallrunScript;
+    public float wallrunMaxSpeed = 15f;
+    
+    // Player states
+    [HideInInspector] public bool wallrunning;
 
     private void Start()
     {
@@ -45,6 +50,7 @@ public class PlayerMovementTutorial : MonoBehaviour
 
         readyToJump = true;
         swingScript = GetComponent<PlayerSwing>();
+        wallrunScript = GetComponent<WallRunning>();
     }
 
     private void Update()
@@ -107,14 +113,17 @@ public class PlayerMovementTutorial : MonoBehaviour
     {
         float maxSpeed = moveSpeed;
         bool isSwinging = swingScript != null && swingScript.IsSwinging;
+        bool isWallrunning = wallrunScript != null && wallrunning;
 
         if (isSwinging)
             maxSpeed = swingMaxSpeed;
+        else if (isWallrunning)
+            maxSpeed = wallrunMaxSpeed;
 
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        // Only clamp velocity if grounded or swinging
-        if ((grounded || isSwinging) && flatVel.magnitude > maxSpeed)
+        // Only clamp velocity if grounded, swinging, or wallrunning
+        if ((grounded || isSwinging || isWallrunning) && flatVel.magnitude > maxSpeed)
         {
             Vector3 limitedVel = flatVel.normalized * maxSpeed;
             rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
